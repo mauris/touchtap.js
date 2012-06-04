@@ -59,7 +59,7 @@
             return {
                 start: null,
                 orientation: 0,
-                down: function(event){
+                start: function(event){
                     event.preventDefault();
                     this.start = {x: event.pageX, y: event.pageY};
                     return false;
@@ -84,7 +84,7 @@
                     }
                     return false;
                 },
-                up: function(event){
+                disable: function(event){
                     event.preventDefault();
                     this.start = null;
                     return false;
@@ -93,15 +93,15 @@
         },
         scroll: function(callback){
             var handler = new touchtap.scrollHandler(this, callback);
-            this.mousedown(handler.down).mousemove(handler.move).mouseup(handler.up);
+            this.mousedown(handler.start).mousemove(handler.move).mouseup(handler.disable).mouseout(handler.disable);
         },
         scrollX: function(callback){
             var handler = new touchtap.scrollHandler(this, callback, 1);
-            this.mousedown(handler.down).mousemove(handler.move).mouseup(handler.up);
+            this.mousedown(handler.start).mousemove(handler.move).mouseup(handler.disable).mouseout(handler.disable);
         },
         scrollY: function(callback){
             var handler = new touchtap.scrollHandler(this, callback, 2);
-            this.mousedown(handler.down).mousemove(handler.move).mouseup(handler.up);            
+            this.mousedown(handler.start).mousemove(handler.move).mouseup(handler.disable).mouseout(handler.disable);
         }
     };
     
