@@ -14,7 +14,7 @@
             longPressDelay: 800
         },
         publicMethods:
-            ['tap', 'hold'],
+            ['tap', 'doubletap', 'hold'],
         holdTimer: null,
         init: function(){
             
@@ -24,10 +24,14 @@
                 $(this).click(callback);
             });
         },
+        doubletap: function(callback){
+            this.each(function(){
+                $(this).dblclick(callback);
+            });
+        },
         hold: function(callback){
             this.mousedown(function(){
                 var e = this;
-                console.log(e);
                 touchtap.holdTimer = window.setTimeout(function(){
                         callback.apply(e)
                     },

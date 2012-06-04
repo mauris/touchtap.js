@@ -4,25 +4,45 @@
     
     var TouchTapDemo = {
         init: function(){
-            this.resetLabel();
+            this.resetLabels();
             this.setHandlers();
         },
-        resetLabel: function(){
+        timers: [],
+        resetLabels: function(){
             $(".example-unit").each(function(){
-                $(this).text($(this).attr('data-label'));
+                TouchTapDemo.resetLabel(this);
             });
+        },
+        resetLabel: function(e){
+            $(e).text($(e).attr('data-label'));
         },
         setTriggerLabel: function(e){
             $(e).text($(e).attr('data-trigger'));
         },
         setHandlers: function(){
             $("#exTap1").touchtap('tap', function(){
-                TouchTapDemo.setTriggerLabel(this);
-                window.setTimeout(function(){TouchTapDemo.resetLabel();}, 2000);
+                var e = this;
+                TouchTapDemo.setTriggerLabel(e);
+                if(TouchTapDemo.timers['tap']){
+                    TouchTapDemo.timers['tap'] = window.clearTimeout(TouchTapDemo.timers['tap']);
+                }
+                TouchTapDemo.timers['tap'] = window.setTimeout(function(){TouchTapDemo.resetLabel(e);}, 2000);
+            });
+            $("#exDoubleTap1").touchtap('doubletap', function(){
+                var e = this;
+                TouchTapDemo.setTriggerLabel(e);
+                if(TouchTapDemo.timers['tap']){
+                    TouchTapDemo.timers['tap'] = window.clearTimeout(TouchTapDemo.timers['tap']);
+                }
+                TouchTapDemo.timers['tap'] = window.setTimeout(function(){TouchTapDemo.resetLabel(e);}, 2000);
             });
             $("#exHold1").touchtap('hold', function(){
-                TouchTapDemo.setTriggerLabel(this);
-                window.setTimeout(function(){TouchTapDemo.resetLabel();}, 2000);
+                var e = this;
+                TouchTapDemo.setTriggerLabel(e);
+                if(TouchTapDemo.timers['tap']){
+                    TouchTapDemo.timers['tap'] = window.clearTimeout(TouchTapDemo.timers['tap']);
+                }
+                TouchTapDemo.timers['tap'] = window.setTimeout(function(){TouchTapDemo.resetLabel(e);}, 2000);
             });
         }
     };
