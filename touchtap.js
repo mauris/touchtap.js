@@ -15,7 +15,6 @@
         },
         publicMethods:
             ['tap', 'doubletap', 'hold'],
-        holdTimer: null,
         init: function(){
             
         },
@@ -31,18 +30,25 @@
             });
             return this;
         },
+        holdHandler: function(obj, callback){
+            return {
+                timer: null,
+                down: function(){
+                    this.timer = window.setTimeout(function(){
+                            callback.apply(obj)
+                        },
+                        touchtap.constants.longPressDelay
+                    );
+                },
+                up: function(){
+                    window.clearTimeout(this.timer);
+                    this.timer = null;
+                }
+            }
+        },
         hold: function(callback){
-            this.mousedown(function(){
-                var e = this;
-                touchtap.holdTimer = window.setTimeout(function(){
-                        callback.apply(e)
-                    },
-                    touchtap.constants.longPressDelay
-                );
-            }).mouseup(function(){
-                window.clearTimeout(touchtap.holdTimer);
-                touchtap.holdTimer = null;
-            });
+            var handler = new touchtap.holdHandler(this, callback);
+            this.mousedown(handler.down).mouseup(handler.up);
             return this;
         }
     };
