@@ -48,19 +48,22 @@
             });
             
             (function(){
-                var scrollHandler = function(){
+                var panHandler = function(){
                     return {
+                        startX: null,
                         startY: null,
-                        down: function(event){
+                        calibrate: function(event){
+                            startX = (document.all ? document.scrollLeft : window.pageXOffset);
                             startY = (document.all ? document.scrollTop : window.pageYOffset);
                         },
-                        scroll:function(val){
-                            window.scrollTo(0, startY + val);
+                        pan: function(change){
+                            console.log(change);
+                            window.scrollTo(startX + change.x, startY + change.y);
                         }
                     };
                 }
-                var handler = new scrollHandler();
-                $("body").mousedown(handler.down).touchtap('scrollY', handler.scroll);
+                var handler = new panHandler();
+                $("body").mousedown(handler.calibrate).touchtap('scroll', handler.pan);
             })();
         }
     };

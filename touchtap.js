@@ -14,7 +14,15 @@
             longPressDelay: 800
         },
         publicMethods:
-            ['tap', 'doubletap', 'hold', 'scroll', 'scrollX', 'scrollY'],
+            [
+                'tap',
+                'doubletap',
+                'hold',
+                'scroll',
+                'scrollX',
+                'scrollY',
+                'pan'
+            ],
         init: function(){
             
         },
@@ -33,7 +41,7 @@
         holdHandler: function(obj, callback){
             return {
                 timer: null,
-                down: function(event){
+                start: function(event){
                     event.preventDefault();
                     this.timer = window.setTimeout(function(){
                             callback.apply(obj)
@@ -42,7 +50,7 @@
                     );
                     return false;
                 },
-                up: function(event){
+                cancel: function(event){
                     event.preventDefault();
                     window.clearTimeout(this.timer);
                     this.timer = null;
@@ -52,14 +60,14 @@
         },
         hold: function(callback){
             var handler = new touchtap.holdHandler(this, callback);
-            this.mousedown(handler.down).mouseup(handler.up);
+            this.mousedown(handler.start).mouseup(handler.cancel);
             return this;
         },
         scrollHandler: function(obj, callback, orientation){
             return {
                 start: null,
                 orientation: 0,
-                start: function(event){
+                enable: function(event){
                     event.preventDefault();
                     this.start = {x: event.pageX, y: event.pageY};
                     return false;
@@ -93,15 +101,27 @@
         },
         scroll: function(callback){
             var handler = new touchtap.scrollHandler(this, callback);
-            this.mousedown(handler.start).mousemove(handler.move).mouseup(handler.disable).mouseout(handler.disable);
+            this.mousedown(handler.enable).mousemove(handler.move)
+                .mouseup(handler.disable).mouseout(handler.disable);
+            return this;
         },
         scrollX: function(callback){
             var handler = new touchtap.scrollHandler(this, callback, 1);
-            this.mousedown(handler.start).mousemove(handler.move).mouseup(handler.disable).mouseout(handler.disable);
+            this.mousedown(handler.enable).mousemove(handler.move)
+                .mouseup(handler.disable).mouseout(handler.disable);
+            return this;
         },
         scrollY: function(callback){
             var handler = new touchtap.scrollHandler(this, callback, 2);
-            this.mousedown(handler.start).mousemove(handler.move).mouseup(handler.disable).mouseout(handler.disable);
+            this.mousedown(handler.enable).mousemove(handler.move)
+                .mouseup(handler.disable).mouseout(handler.disable);
+            return this;
+        },
+        pan: function(callback){
+            var handler = new touchtap.scrollHandler(this, callback);
+            this.mousedown(handler.enable).mousemove(handler.move)
+                .mouseup(handler.disable).mouseout(handler.disable);
+            return this;
         }
     };
     
