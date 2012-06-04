@@ -53,11 +53,10 @@
                         startX: null,
                         startY: null,
                         calibrate: function(event){
-                            startX = (document.all ? document.scrollLeft : window.pageXOffset);
-                            startY = (document.all ? document.scrollTop : window.pageYOffset);
+                            startX = $('html').scrollLeft();
+                            startY = $('html').scrollTop();
                         },
                         pan: function(change){
-                            console.log(change);
                             window.scrollTo(startX + change.x, startY + change.y);
                         }
                     };
