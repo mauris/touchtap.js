@@ -10,14 +10,32 @@
 (function($){
     
     var touchtap = {
+        constants:{
+            longPressDelay: 800
+        },
         publicMethods:
-            ['tap'],
+            ['tap', 'hold'],
+        holdTimer: null,
         init: function(){
             
         },
         tap: function(callback){
             this.each(function(){
                 $(this).click(callback);
+            });
+        },
+        hold: function(callback){
+            this.mousedown(function(){
+                var e = this;
+                console.log(e);
+                touchtap.holdTimer = window.setTimeout(function(){
+                        callback.apply(e)
+                    },
+                    touchtap.constants.longPressDelay
+                );
+            }).mouseup(function(){
+                window.clearTimeout(touchtap.holdTimer);
+                touchtap.holdTimer = null;
             });
         }
     };

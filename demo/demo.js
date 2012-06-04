@@ -20,6 +20,10 @@
                 TouchTapDemo.setTriggerLabel(this);
                 window.setTimeout(function(){TouchTapDemo.resetLabel();}, 2000);
             });
+            $("#exHold1").touchtap('hold', function(){
+                TouchTapDemo.setTriggerLabel(this);
+                window.setTimeout(function(){TouchTapDemo.resetLabel();}, 2000);
+            });
         }
     };
     
