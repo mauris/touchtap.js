@@ -23,11 +23,13 @@
             this.each(function(){
                 $(this).click(callback);
             });
+            return this;
         },
         doubletap: function(callback){
             this.each(function(){
                 $(this).dblclick(callback);
             });
+            return this;
         },
         hold: function(callback){
             this.mousedown(function(){
@@ -41,6 +43,7 @@
                 window.clearTimeout(touchtap.holdTimer);
                 touchtap.holdTimer = null;
             });
+            return this;
         }
     };
     
@@ -63,7 +66,7 @@
         }else{
             $.error('Method "' +  method + '" does not exist on jQuery.touchtap.');
         }
-        return null;
+        return this;
     };
     
 })(jQuery);
