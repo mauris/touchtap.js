@@ -100,7 +100,6 @@
                 },
                 disable: function(event){
                     if(this.start){
-                        console.log('stop');
                         event.preventDefault();
                         this.start = null;
                         this.direction = null;
