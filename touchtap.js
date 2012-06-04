@@ -10,9 +10,9 @@
 (function($){
     
     var touchtap = {
-        constants:{
-            longPressDelay: 800
-        },
+        __longPressDelay: 800,
+        _touchEnabled: false,
+        _init: false,
         publicMethods:
             [
                 'tap',
@@ -24,6 +24,10 @@
                 'pan'
             ],
         init: function(){
+            this._touchEnabled = ('ontouchstart' in window);
+            this._init = true;
+        },
+        config: function(){
             
         },
         tap: function(callback){
@@ -38,30 +42,76 @@
             });
             return this;
         },
-        holdHandler: function(obj, callback){
-            return {
-                timer: null,
-                start: function(event){
-                    event.preventDefault();
-                    this.timer = window.setTimeout(function(){
-                            callback.apply(obj)
-                        },
-                        touchtap.constants.longPressDelay
-                    );
-                    return false;
-                },
-                cancel: function(event){
-                    event.preventDefault();
-                    window.clearTimeout(this.timer);
-                    this.timer = null;
-                    return false;
+        getEventCoordinates: function (event){
+            event = event || window.event;
+
+            if(touchtap._touchEnabled) {
+                // multitouch, return array with positions
+                var pos = [];
+                for(var i = 0, len= event.touches.length; i < len; ++i) {
+                    pos.push({x: event.touches[i].pageX, y: event.touches[i].pageY});
                 }
+                return pos;
+            } else {
+                // non-touchy, use the event pageX and pageY
+                var d = document;
+                var b = d.body;
+
+                return [{
+                    x: event.pageX || event.clientX + (d && d.scrollLeft || b && b.scrollLeft || 0 ) - ( d && d.clientLeft || b && d.clientLeft || 0 ),
+                    y: event.pageY || event.clientY + (d && d.scrollTop || b && b.scrollTop || 0 ) - ( d && d.clientTop || b && d.clientTop || 0 )
+                }];
             }
         },
+        eventController: function(eventType, callback, obj){
+            return {
+                touchData: {
+                    startPosition: null,
+                    curentPositions: null,
+                    mousedown: false,
+                    holdTimer: null
+                },
+                handler: function(event){
+                    var data = this.touchData;
+                    switch(event.type){
+                        case 'mousedown':
+                        case 'touchstart':
+                            data.start = touchtap.getEventCoordinates(event);
+                            data.mousedown = true;
+                            if(eventType == 'hold'){
+                                data.holdTimer = window.setTimeout(function(){
+                                        data.mousedown = false;
+                                        data.holdTimer = null
+                                        callback.apply(obj);
+                                    }, touchtap.__longPressDelay);
+                            }
+                            break;
+                        case 'mousemove':
+                        case 'touchmove':
+                            break;
+                        case 'mouseout':
+                        case 'mouseup':
+                        case 'mouseleave':
+                        case 'touchcancel':
+                        case 'touchend':
+                            if(data.mousedown){
+                                // clear timer if the hold event is still there
+                                if(data.holdTimer){
+                                    window.clearTimeout(data.holdTimer);
+                                    data.holdTimer = null;
+                                }
+                            }
+                            break;
+                    }
+                }
+            };
+        },
         hold: function(callback){
-            var handler = new touchtap.holdHandler(this, callback);
-            this.mousedown(handler.start).mouseup(handler.cancel);
-            return this;
+            var controller = new touchtap.eventController('hold', callback, this);
+            var events = ['mousedown', 'mouseup', 'mouseout'];
+            for(var e in events){
+                this.on(events[e], function(event){controller.handler.apply(controller, [event]);});
+            }
         },
         scrollHandler: function(obj, callback, orientation){
             return {
@@ -145,10 +195,13 @@
     }
     
     $.fn.touchtap = function(method){
+        if(!touchtap._init){
+            touchtap.init().apply(this);
+        }
         if(touchtap.publicMethods.indexOf(method) > -1){
             return touchtap[method].apply(this, Array.prototype.slice.call(arguments, 1));
-        }else if(typeof method === 'object' || ! method){
-            return touchtap.init.apply( this, arguments );
+        }else if(typeof method === 'object' || !method){
+            return touchtap.config.apply(this, arguments);
         }else{
             $.error('Method "' +  method + '" does not exist on jQuery.touchtap.');
         }
