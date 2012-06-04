@@ -66,36 +66,45 @@
         scrollHandler: function(obj, callback, orientation){
             return {
                 start: null,
-                orientation: 0,
                 enable: function(event){
-                    event.preventDefault();
-                    this.start = {x: event.pageX, y: event.pageY};
-                    return false;
+                    if(!this.start){
+                        event.preventDefault();
+                        this.start = {x: event.pageX, y: event.pageY};
+                    }
                 },
                 move: function(event){
                     event.preventDefault();
                     if(this.start){
                         var data = null;
+                        var mag = null;
                         switch(orientation){
                             case 1: // x
                                 data = this.start.x - event.pageX;
+                                mag = Math.abs(data);
                                 break;
                             case 2: // y
                                 data = this.start.y - event.pageY;
+                                mag = Math.abs(data);
                                 break;
                             default:
                                 data = {x: this.start.x - event.pageX,
                                     y: this.start.y - event.pageY};
+                                mag = Math.max(Math.abs(data.x), Math.abs(data.y));
                                 break;
                         }
-                        callback.apply(obj, [data]);
+                        if(mag > 2){
+                            callback.apply(obj, [data]);
+                            this.start = {x: event.pageX, y: event.pageY};
+                        }
                     }
-                    return false;
                 },
                 disable: function(event){
-                    event.preventDefault();
-                    this.start = null;
-                    return false;
+                    if(this.start){
+                        console.log('stop');
+                        event.preventDefault();
+                        this.start = null;
+                        this.direction = null;
+                    }
                 }
             }
         },

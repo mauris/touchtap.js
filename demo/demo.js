@@ -48,21 +48,9 @@
             });
             
             (function(){
-                var panHandler = function(){
-                    return {
-                        startX: null,
-                        startY: null,
-                        calibrate: function(event){
-                            startX = $('html').scrollLeft();
-                            startY = $('html').scrollTop();
-                        },
-                        pan: function(change){
-                            window.scrollTo(startX + change.x, startY + change.y);
-                        }
-                    };
-                }
-                var handler = new panHandler();
-                $("body").mousedown(handler.calibrate).touchtap('scroll', handler.pan);
+                $(window).touchtap('scroll', function(change){
+                    window.scrollBy(change.x, change.y);
+                });
             })();
         }
     };
