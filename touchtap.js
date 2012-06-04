@@ -14,7 +14,7 @@
             longPressDelay: 800
         },
         publicMethods:
-            ['tap', 'doubletap', 'hold'],
+            ['tap', 'doubletap', 'hold', 'scroll', 'scrollX', 'scrollY'],
         init: function(){
             
         },
@@ -33,16 +33,20 @@
         holdHandler: function(obj, callback){
             return {
                 timer: null,
-                down: function(){
+                down: function(event){
+                    event.preventDefault();
                     this.timer = window.setTimeout(function(){
                             callback.apply(obj)
                         },
                         touchtap.constants.longPressDelay
                     );
+                    return false;
                 },
-                up: function(){
+                up: function(event){
+                    event.preventDefault();
                     window.clearTimeout(this.timer);
                     this.timer = null;
+                    return false;
                 }
             }
         },
@@ -50,6 +54,54 @@
             var handler = new touchtap.holdHandler(this, callback);
             this.mousedown(handler.down).mouseup(handler.up);
             return this;
+        },
+        scrollHandler: function(obj, callback, orientation){
+            return {
+                start: null,
+                orientation: 0,
+                down: function(event){
+                    event.preventDefault();
+                    this.start = {x: event.pageX, y: event.pageY};
+                    return false;
+                },
+                move: function(event){
+                    event.preventDefault();
+                    if(this.start){
+                        var data = null;
+                        switch(orientation){
+                            case 1: // x
+                                data = this.start.x - event.pageX;
+                                break;
+                            case 2: // y
+                                data = this.start.y - event.pageY;
+                                break;
+                            default:
+                                data = {x: this.start.x - event.pageX,
+                                    y: this.start.y - event.pageY};
+                                break;
+                        }
+                        callback.apply(obj, [data]);
+                    }
+                    return false;
+                },
+                up: function(event){
+                    event.preventDefault();
+                    this.start = null;
+                    return false;
+                }
+            }
+        },
+        scroll: function(callback){
+            var handler = new touchtap.scrollHandler(this, callback);
+            this.mousedown(handler.down).mousemove(handler.move).mouseup(handler.up);
+        },
+        scrollX: function(callback){
+            var handler = new touchtap.scrollHandler(this, callback, 1);
+            this.mousedown(handler.down).mousemove(handler.move).mouseup(handler.up);
+        },
+        scrollY: function(callback){
+            var handler = new touchtap.scrollHandler(this, callback, 2);
+            this.mousedown(handler.down).mousemove(handler.move).mouseup(handler.up);            
         }
     };
     
