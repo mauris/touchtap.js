@@ -1,0 +1,12 @@
+
+.example-unit{
+    padding:50px 20px;
+}
+
+#exTap1{
+    background:#4671D5;
+    text-align:center;
+    cursor:pointer;
+    border-radius:5px;
+    color:#FFF;
+}
