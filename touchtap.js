@@ -72,10 +72,21 @@
                     firstTapDateTime: null
                 },
                 set: function(){
-                    var events = ['mousedown', 'mouseup', 'mouseout'];
+                    var events = [
+                        'mousedown',
+                        'mouseup',
+                        'mouseout',
+                        'mouseleave',
+                        'touchstart',
+                        'touchend',
+                        'touchcancel',
+                        'touchmove'
+                    ];
                     var controller = this;
                     for(var e in events){
-                        obj.on(events[e], function(event){controller.handler.apply(controller, [event]);});
+                        obj.on(events[e], function(event){
+                                controller.handler.apply(controller, [event]);
+                            });
                     }
                 },
                 handler: function(event){
