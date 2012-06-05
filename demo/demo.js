@@ -67,7 +67,7 @@
             
             (function(){
                 var last = null;
-                $('#exPanBox').bind('touchtap.scrollEnd', function(event, position){
+                $('#exPan1').bind('touchtap.scrollEnd', function(event, position){
                     last = null;
                 }).touchtap('scroll', function(positions){
                     if(last){
@@ -77,8 +77,8 @@
                             y: last[0].y
                                 - positions[0].y
                         };
-                        $(this).css('top', (parseInt($(this).css('top')) - change.y)+'px');
-                        $(this).css('left', (parseInt($(this).css('left')) - change.x)+'px');
+                        $('#exPanBox').css('top', (parseInt($('#exPanBox').css('top')) - change.y)+'px');
+                        $('#exPanBox').css('left', (parseInt($('#exPanBox').css('left')) - change.x)+'px');
                     }
                     last = positions;
                 });
