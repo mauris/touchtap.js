@@ -10,7 +10,8 @@
 (function($){
     
     var touchtap = {
-        __longPressDelay: 800,
+        __longPressDelayMs: 800,
+        __doubleTapIntervalMs: 800,
         _touchEnabled: false,
         _init: false,
         publicMethods:
@@ -31,15 +32,13 @@
             
         },
         tap: function(callback){
-            this.each(function(){
-                $(this).click(callback);
-            });
+            var controller = new touchtap.eventController('tap', callback, this);
+            controller.set();
             return this;
         },
         doubletap: function(callback){
-            this.each(function(){
-                $(this).dblclick(callback);
-            });
+            var controller = new touchtap.eventController('doubletap', callback, this);
+            controller.set();
             return this;
         },
         getEventCoordinates: function (event){
@@ -69,7 +68,15 @@
                     startPosition: null,
                     curentPositions: null,
                     mousedown: false,
-                    holdTimer: null
+                    holdTimer: null,
+                    firstTapDateTime: null
+                },
+                set: function(){
+                    var events = ['mousedown', 'mouseup', 'mouseout'];
+                    var controller = this;
+                    for(var e in events){
+                        obj.on(events[e], function(event){controller.handler.apply(controller, [event]);});
+                    }
                 },
                 handler: function(event){
                     var data = this.touchData;
@@ -83,7 +90,7 @@
                                         data.mousedown = false;
                                         data.holdTimer = null
                                         callback.apply(obj);
-                                    }, touchtap.__longPressDelay);
+                                    }, touchtap.__longPressDelayMs);
                             }
                             break;
                         case 'mousemove':
@@ -99,6 +106,18 @@
                                 if(data.holdTimer){
                                     window.clearTimeout(data.holdTimer);
                                     data.holdTimer = null;
+                                }else if(eventType == 'doubletap'){
+                                    if(data.firstTapDateTime){
+                                        var interval = Date.now() - data.firstTapDateTime;
+                                        if(interval < touchtap.__doubleTapIntervalMs){
+                                            callback.apply(obj);
+                                        }
+                                        data.firstTapDateTime = null;
+                                    }else{
+                                        data.firstTapDateTime = Date.now();
+                                    }
+                                }else if(eventType == 'tap'){
+                                    callback.apply(obj);
                                 }
                             }
                             break;
@@ -108,10 +127,8 @@
         },
         hold: function(callback){
             var controller = new touchtap.eventController('hold', callback, this);
-            var events = ['mousedown', 'mouseup', 'mouseout'];
-            for(var e in events){
-                this.on(events[e], function(event){controller.handler.apply(controller, [event]);});
-            }
+            controller.set();
+            return this;
         },
         scrollHandler: function(obj, callback, orientation){
             return {
@@ -196,7 +213,7 @@
     
     $.fn.touchtap = function(method){
         if(!touchtap._init){
-            touchtap.init().apply(this);
+            touchtap.init.apply(this);
         }
         if(touchtap.publicMethods.indexOf(method) > -1){
             return touchtap[method].apply(this, Array.prototype.slice.call(arguments, 1));
