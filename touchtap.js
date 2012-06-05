@@ -62,6 +62,11 @@
                 }];
             }
         },
+        positionDiff: function(pointA, pointB){
+            var x = Math.abs(pointA.x - pointB.x);
+            var y = Math.abs(pointA.x - pointB.x);
+            return Math.sqrt(x * x + y * y);
+        },
         eventController: function(eventType, callback, obj){
             return {
                 touchData: {
@@ -69,7 +74,7 @@
                     curentPositions: null,
                     mousedown: false,
                     holdTimer: null,
-                    firstTapDateTime: null
+                    firstTap: null
                 },
                 set: function(){
                     var events = [
@@ -106,6 +111,9 @@
                             break;
                         case 'mousemove':
                         case 'touchmove':
+                            if(eventType == 'scroll' || eventType == 'pan'){
+                                
+                            }
                             break;
                         case 'mouseout':
                         case 'mouseup':
@@ -118,18 +126,27 @@
                                     window.clearTimeout(data.holdTimer);
                                     data.holdTimer = null;
                                 }else if(eventType == 'doubletap'){
-                                    if(data.firstTapDateTime){
-                                        var interval = Date.now() - data.firstTapDateTime;
-                                        if(interval < touchtap.__doubleTapIntervalMs){
+                                    var collectData = true;
+                                    if(data.firstTap){
+                                        var interval = Date.now() - data.firstTap.time;
+                                        var position = {x: event.pageX, y: event.pageY};
+                                        if(interval < touchtap.__doubleTapIntervalMs
+                                            && touchtap.positionDiff(data.firstTap.position, position) < 5){
                                             callback.apply(obj);
+                                            data.firstTap = null;
+                                            collectData = false;
                                         }
-                                        data.firstTapDateTime = null;
-                                    }else{
-                                        data.firstTapDateTime = Date.now();
+                                    }
+                                    if(collectData){
+                                        data.firstTap ={
+                                            time: Date.now(),
+                                            position: {x: event.pageX, y: event.pageY}
+                                        };
                                     }
                                 }else if(eventType == 'tap'){
                                     callback.apply(obj);
                                 }
+                                data.mousedown = false;
                             }
                             break;
                     }
