@@ -9,7 +9,7 @@
         },
         timers: [],
         resetLabels: function(){
-            $(".example-unit").each(function(){
+            $(".example-label").each(function(){
                 TouchTapDemo.resetLabel(this);
             });
         },
@@ -49,7 +49,8 @@
             
             (function(){
                 var last = null;
-                $(window).bind('touchtap.scrollStart', function(positions){
+                $('#exScroll1').bind('touchtap.scrollEnd', function(event, position){
+                    last = null;
                 }).touchtap('scroll', function(positions){
                     if(last){
                         var change = {
@@ -58,7 +59,26 @@
                             y: last[0].y
                                 - positions[0].y
                         };
-                        window.scrollBy(change.x, change.y);
+                        $(this).scrollTop($(this).scrollTop() + change.y);
+                    }
+                    last = positions;
+                });
+            })();
+            
+            (function(){
+                var last = null;
+                $('#exPanBox').bind('touchtap.scrollEnd', function(event, position){
+                    last = null;
+                }).touchtap('scroll', function(positions){
+                    if(last){
+                        var change = {
+                            x: last[0].x
+                                - positions[0].x,
+                            y: last[0].y
+                                - positions[0].y
+                        };
+                        $(this).css('top', (parseInt($(this).css('top')) - change.y)+'px');
+                        $(this).css('left', (parseInt($(this).css('left')) - change.x)+'px');
                     }
                     last = positions;
                 });

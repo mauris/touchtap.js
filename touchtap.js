@@ -20,8 +20,6 @@
                 'doubletap',
                 'hold',
                 'scroll',
-                'scrollX',
-                'scrollY',
                 'pan'
             ],
         init: function(){
@@ -118,6 +116,10 @@
                                 data.currentPosition = touchtap.getEventCoordinates(event);
                                 if(eventType == 'scroll'){
                                     callback.apply(obj, [data.currentPosition]);
+                                }else if(eventType == 'hold' && data.holdTimer
+                                    && touchtap.positionDiff(data.startPosition[0], data.currentPosition[0]) > 5){
+                                    window.clearTimeout(data.holdTimer);
+                                    data.holdTimer = null;
                                 }
                             }
                             break;
@@ -132,6 +134,8 @@
                                 if(data.holdTimer){
                                     window.clearTimeout(data.holdTimer);
                                     data.holdTimer = null;
+                                }else if(eventType == 'scroll'){
+                                    obj.trigger('touchtap.scrollEnd', endPosition);
                                 }else if(eventType == 'doubletap'){
                                     var collectData = true;
                                     if(data.firstTap){
@@ -211,18 +215,6 @@
         scroll: function(callback){
             var controller = new touchtap.eventController('scroll', callback, this);
             controller.set();
-            return this;
-        },
-        scrollX: function(callback){
-            var handler = new touchtap.scrollHandler(this, callback, 1);
-            this.mousedown(handler.enable).mousemove(handler.move)
-                .mouseup(handler.disable).mouseout(handler.disable);
-            return this;
-        },
-        scrollY: function(callback){
-            var handler = new touchtap.scrollHandler(this, callback, 2);
-            this.mousedown(handler.enable).mousemove(handler.move)
-                .mouseup(handler.disable).mouseout(handler.disable);
             return this;
         },
         pan: function(callback){
