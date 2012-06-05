@@ -71,7 +71,7 @@
             return {
                 touchData: {
                     startPosition: null,
-                    curentPositions: null,
+                    currentPosition: null,
                     mousedown: false,
                     holdTimer: null,
                     firstTap: null
@@ -82,6 +82,7 @@
                         'mouseup',
                         'mouseout',
                         'mouseleave',
+                        'mousemove',
                         'touchstart',
                         'touchend',
                         'touchcancel',
@@ -99,7 +100,7 @@
                     switch(event.type){
                         case 'mousedown':
                         case 'touchstart':
-                            data.start = touchtap.getEventCoordinates(event);
+                            data.startPosition = touchtap.getEventCoordinates(event);
                             data.mousedown = true;
                             if(eventType == 'hold'){
                                 data.holdTimer = window.setTimeout(function(){
@@ -107,12 +108,17 @@
                                         data.holdTimer = null
                                         callback.apply(obj);
                                     }, touchtap.__longPressDelayMs);
+                            }else if(eventType == 'scroll'){
+                                obj.trigger('touchtap.scrollStart');
                             }
                             break;
                         case 'mousemove':
                         case 'touchmove':
-                            if(eventType == 'scroll' || eventType == 'pan'){
-                                
+                            if(data.mousedown){
+                                data.currentPosition = touchtap.getEventCoordinates(event);
+                                if(eventType == 'scroll'){
+                                    callback.apply(obj, [data.currentPosition]);
+                                }
                             }
                             break;
                         case 'mouseout':
@@ -121,6 +127,7 @@
                         case 'touchcancel':
                         case 'touchend':
                             if(data.mousedown){
+                                var endPosition = touchtap.getEventCoordinates(event);
                                 // clear timer if the hold event is still there
                                 if(data.holdTimer){
                                     window.clearTimeout(data.holdTimer);
@@ -129,9 +136,8 @@
                                     var collectData = true;
                                     if(data.firstTap){
                                         var interval = Date.now() - data.firstTap.time;
-                                        var position = {x: event.pageX, y: event.pageY};
                                         if(interval < touchtap.__doubleTapIntervalMs
-                                            && touchtap.positionDiff(data.firstTap.position, position) < 5){
+                                            && touchtap.positionDiff(data.firstTap.position, endPosition[0]) < 5){
                                             callback.apply(obj);
                                             data.firstTap = null;
                                             collectData = false;
@@ -140,7 +146,7 @@
                                     if(collectData){
                                         data.firstTap ={
                                             time: Date.now(),
-                                            position: {x: event.pageX, y: event.pageY}
+                                            position: endPosition[0]
                                         };
                                     }
                                 }else if(eventType == 'tap'){
@@ -203,9 +209,8 @@
             }
         },
         scroll: function(callback){
-            var handler = new touchtap.scrollHandler(this, callback);
-            this.mousedown(handler.enable).mousemove(handler.move)
-                .mouseup(handler.disable).mouseout(handler.disable);
+            var controller = new touchtap.eventController('scroll', callback, this);
+            controller.set();
             return this;
         },
         scrollX: function(callback){
@@ -221,10 +226,7 @@
             return this;
         },
         pan: function(callback){
-            var handler = new touchtap.scrollHandler(this, callback);
-            this.mousedown(handler.enable).mousemove(handler.move)
-                .mouseup(handler.disable).mouseout(handler.disable);
-            return this;
+            return this.scroll.apply(this, [callback]);
         }
     };
     
