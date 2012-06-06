@@ -1,0 +1,68 @@
+*{
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+body{
+    margin: 20px 0;
+}
+
+.example-unit{
+    padding:50px 20px;
+    cursor:pointer;
+    border-radius:5px;
+    text-align:center;
+}
+
+#exTap1{
+    background:#9B001C;
+    color:#FFF;
+}
+
+#exDoubleTap1{
+    background:#A2EF00;
+    color:#FFF;
+}
+
+#exHold1{
+    background:#007241;
+    color:#FFF;
+}
+
+#exScroll1{
+    padding:20px;
+    background:#f5f5f5;
+    color:#333;
+    height: 230px;
+    overflow:auto;
+    text-align:left;
+}
+#exScroll1 p{
+    font: normal 14px/2.40 Tahoma, Verdana, sans-serif;
+}
+
+#exPan1{
+    padding: 10px;
+    border: 1px solid #ccc;
+    height:300px;
+    cursor:default;
+    overflow:hidden;
+}
+
+#exPanBox{
+    height:50px;
+    width:50px;
+    top:0;
+    left:0;
+    position:relative;
+    background: #F33;
+    cursor:pointer;
+}
+
+.row{
+    margin-bottom: 20px;
+}
