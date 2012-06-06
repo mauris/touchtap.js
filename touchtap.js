@@ -55,8 +55,8 @@
                 var b = d.body;
 
                 return [{
-                    x: event.pageX || event.clientX + (d && d.scrollLeft || b && b.scrollLeft || 0 ) - ( d && d.clientLeft || b && d.clientLeft || 0 ),
-                    y: event.pageY || event.clientY + (d && d.scrollTop || b && b.scrollTop || 0 ) - ( d && d.clientTop || b && d.clientTop || 0 )
+                    x: event.clientX,
+                    y: event.clientY
                 }];
             }
         },
@@ -100,26 +100,43 @@
                         case 'touchstart':
                             data.startPosition = touchtap.getEventCoordinates(event);
                             data.mousedown = true;
-                            if(eventType == 'hold'){
-                                data.holdTimer = window.setTimeout(function(){
-                                        data.mousedown = false;
-                                        data.holdTimer = null
-                                        callback.apply(obj);
-                                    }, touchtap.__longPressDelayMs);
-                            }else if(eventType == 'scroll'){
-                                obj.trigger('touchtap.scrollStart');
+                            if(data.startPosition.length == 1){
+                                if(eventType == 'hold'){
+                                    data.holdTimer = window.setTimeout(function(){
+                                            event.stopPropagation();
+                                            data.mousedown = false;
+                                            data.holdTimer = null
+                                            callback.apply(obj);
+                                        }, touchtap.__longPressDelayMs);
+                                }else if(eventType == 'scroll'){
+                                    obj.trigger('touchtap.scrollStart');
+                                    event.stopPropagation();
+                                }
+                            }else if(data.startposition.length == 2){
+                                if(eventType == 'twofingerscroll'){
+                                    obj.trigger('touchtap.twoFingerScrollStart');
+                                    event.stopPropagation();
+                                }
                             }
                             break;
                         case 'mousemove':
                         case 'touchmove':
                             if(data.mousedown){
                                 data.currentPosition = touchtap.getEventCoordinates(event);
-                                if(eventType == 'scroll'){
-                                    callback.apply(obj, [data.currentPosition]);
-                                }else if(eventType == 'hold' && data.holdTimer
-                                    && touchtap.positionDiff(data.startPosition[0], data.currentPosition[0]) > 5){
-                                    window.clearTimeout(data.holdTimer);
-                                    data.holdTimer = null;
+                                if(data.currentPosition.length == 1){
+                                    if(eventType == 'scroll'){
+                                        callback.apply(obj, [data.currentPosition]);
+                                        event.stopPropagation();
+                                    }else if(eventType == 'hold' && data.holdTimer
+                                        && touchtap.positionDiff(data.startPosition[0], data.currentPosition[0]) > 5){
+                                        window.clearTimeout(data.holdTimer);
+                                        data.holdTimer = null;
+                                    }
+                                }else if(data.currentPosition.length == 2){
+                                    if(eventType == 'twofingerscroll'){
+                                        callback.apply(obj, [data.currentPosition]);
+                                        event.stopPropagation();
+                                    }
                                 }
                             }
                             break;
@@ -131,12 +148,16 @@
                             if(data.mousedown){
                                 var endPosition = touchtap.getEventCoordinates(event);
                                 // clear timer if the hold event is still there
-                                if(data.holdTimer){
+                                if(eventType == 'hold' && data.holdTimer){
                                     window.clearTimeout(data.holdTimer);
                                     data.holdTimer = null;
-                                }else if(eventType == 'scroll'){
+                                }else if(eventType == 'scroll' && endPosition.length == 1){
                                     obj.trigger('touchtap.scrollEnd', endPosition);
-                                }else if(eventType == 'doubletap'){
+                                    event.stopPropagation();
+                                }else if(eventType == 'twofingerscroll' && endPosition.length == 2){
+                                    obj.trigger('touchtap.twoFingerScrollEnd', endPosition);
+                                    event.stopPropagation();
+                                }else if(eventType == 'doubletap' && endPosition.length == 1){
                                     var collectData = true;
                                     if(data.firstTap){
                                         var interval = Date.now() - data.firstTap.time;
@@ -153,8 +174,12 @@
                                             position: endPosition[0]
                                         };
                                     }
-                                }else if(eventType == 'tap'){
+                                }else if(eventType == 'tap' && endPosition.length == 1 && touchtap.positionDiff(data.startPosition[0], endPosition[0]) < 5){
                                     callback.apply(obj);
+                                    event.stopPropagation();
+                                }else if(eventType == 'twofingertap' && endPosition.length == 2 && touchtap.positionDiff(data.startPosition[0], endPosition[0]) < 5){
+                                    callback.apply(obj);
+                                    event.stopPropagation();
                                 }
                                 data.mousedown = false;
                             }

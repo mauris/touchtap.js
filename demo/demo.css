@@ -62,3 +62,7 @@ body{
     background: #F33;
     cursor:pointer;
 }
+
+.row{
+    margin-bottom: 20px;
+}
